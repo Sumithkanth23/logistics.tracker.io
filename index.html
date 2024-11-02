@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Location Sharing</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-database.js"></script>
+</head>
+<body>
+    <h1>Send Real-Time Location Data</h1>
+    <button onclick="startTracking()">Start Tracking</button>
+    <button onclick="stopTracking()">Stop Tracking</button>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6_i8DT86VO-sUbPGom0TEklDA2LdLsJo",
+            authDomain: "siet-bus-tracking-aacce.firebaseapp.com",
+            projectId: "siet-bus-tracking-aacce",
+            storageBucket: "siet-bus-tracking-aacce.firebasestorage.app",
+            messagingSenderId: "553321414123",
+            appId: "1:553321414123:web:a1e3ded519e80ec2b1adae",
+            measurementId: "G-9YJJ6L91DN"
+            databaseURL: "YOUR_DATABASE_URL"
+            
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let trackingId;
+
+        // Function to send location data to Firebase
+        function sendLocation(position) {
+            const locationData = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                timestamp: new Date().toISOString()
+            };
+            db.ref('bus-tracking/bus1').set(locationData);
+        }
+
+        // Start tracking the location
+        function startTracking() {
+            if (navigator.geolocation) {
+                trackingId = navigator.geolocation.watchPosition(sendLocation, error => console.error(error), {
+                    enableHighAccuracy: true
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // Stop tracking the location
+        function stopTracking() {
+            if (trackingId) {
+                navigator.geolocation.clearWatch(trackingId);
+            }
+        }
+    </script>
+</body>
+</html>
