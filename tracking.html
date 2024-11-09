@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bus Tracking</title>
-    <!-- Firebase Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-database.js"></script>
+    <title>Bus Tracking with Firebase Modules</title>
     <!-- Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB7dKtCU2ruX7WDbgf1wFyTRRkqDlvLy6U"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDG4wxuHkdKGotiUFr-dueoW9oIS5p-O5c"></script>
     <style>
         /* Basic styling */
         #map {
@@ -21,26 +18,32 @@
     <h1>Real-Time Bus Location</h1>
     <div id="map"></div>
 
-    <script>
-        // Firebase configuration
+    <!-- Firebase Modules -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+        // Your Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyB7dKtCU2ruX7WDbgf1wFyTRRkqDlvLy6U",
+            apiKey: "AIzaSyD6_i8DT86VO-sUbPGom0TEklDA2LdLsJo",
             authDomain: "siet-bus-tracking-aacce.firebaseapp.com",
+            databaseURL: "https://siet-bus-tracking-aacce-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "siet-bus-tracking-aacce",
             storageBucket: "siet-bus-tracking-aacce.firebasestorage.app",
             messagingSenderId: "553321414123",
             appId: "1:553321414123:web:a1e3ded519e80ec2b1adae",
-            //measurementId: "G-9YJJ6L91DN"
-            databaseURL: "https://siet-bus-tracking-aacce-default-rtdb.asia-southeast1.firebasedatabase.app"
+            measurementId: "G-9YJJ6L91DN"
         };
+
         // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
         // Initialize Google Map
         let map, marker;
         function initMap() {
-            // Default location (start center on a city, e.g., San Francisco)
+            // Default location (e.g., San Francisco)
             const defaultLocation = { lat: 37.7749, lng: -122.4194 };
             map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 12,
@@ -64,15 +67,17 @@
         }
 
         // Listen for location changes in Firebase
-        db.ref("bus-tracking/bus1").on("value", (snapshot) => {
+        const busLocationRef = ref(db, "bus-tracking/bus1");
+        onValue(busLocationRef, (snapshot) => {
             const data = snapshot.val();
+            console.log("Data from Firebase:", data); // Debugging
             if (data) {
                 updateMarker(data);
             }
         });
 
         // Initialize the map after the page loads
-        window.onload = initMap;
+        window.addEventListener("load", initMap);
     </script>
 </body>
 </html>
