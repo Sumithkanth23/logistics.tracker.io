@@ -3,60 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Location Sharing</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-database.js"></script>
+    <title>Real-Time Location Updater</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Send Real-Time Location Data</h1>
-    <button onclick="startTracking()">Start Tracking</button>
-    <button onclick="stopTracking()">Stop Tracking</button>
+    <h1>Send Real-Time Location</h1>
+    <p>Click the button below to start sending your real-time location to the database:</p>
+    <button id="startButton">Start Sending Location</button>
 
-    <script>
-        // Initialize Firebase
+    <!-- Firebase Scripts -->
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
+        import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+
+        // Firebase configuration (replace with your actual Firebase project details)
         const firebaseConfig = {
-            apiKey: "AIzaSyD6_i8DT86VO-sUbPGom0TEklDA2LdLsJo",
-            authDomain: "siet-bus-tracking-aacce.firebaseapp.com",
-            projectId: "siet-bus-tracking-aacce",
-            storageBucket: "siet-bus-tracking-aacce.firebasestorage.app",
-            messagingSenderId: "553321414123",
-            appId: "1:553321414123:web:a1e3ded519e80ec2b1adae",
-            //measurementId: "G-9YJJ6L91DN"
-            databaseURL: "https://siet-bus-tracking-aacce-default-rtdb.asia-southeast1.firebasedatabase.app/"
-            
+            apiKey: "AIzaSyCaNsjn5XPnr7P6ufN10T1Ej10mNFAcBP4",
+            authDomain: "tracking-application-d2060.firebaseapp.com",
+            databaseURL: "https://tracking-application-d2060-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "tracking-application-d2060",
+            storageBucket: "tracking-application-d2060.appspot.com",
+            messagingSenderId: "401177639432",
+            appId: "1:401177639432:web:1b6f9a914aa4d53efcefbd"
         };
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
 
-        let trackingId;
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-        // Function to send location data to Firebase
-        function sendLocation(position) {
-            const locationData = {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-                timestamp: new Date().toISOString()
-            };
-            db.ref('bus-tracking/bus1').set(locationData);
-        }
-
-        // Start tracking the location
-        function startTracking() {
+        // Function to start sending location
+        function startSendingLocation() {
             if (navigator.geolocation) {
-                trackingId = navigator.geolocation.watchPosition(sendLocation, error => console.error(error), {
-                    enableHighAccuracy: true
-                });
+                navigator.geolocation.watchPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        const timestamp = Date.now();
+                        
+                        // Save the location to Firebase
+                        set(ref(database, 'busLocation'), {
+                            latitude: latitude,
+                            longitude: longitude,
+                            timestamp: timestamp
+                        }).then(() => {
+                            console.log("Location updated to Firebase");
+                        }).catch((error) => {
+                            console.error("Error updating location: ", error);
+                        });
+                    },
+                    (error) => {
+                        console.error("Error getting location: ", error);
+                    },
+                    { enableHighAccuracy: true }
+                );
             } else {
-                alert("Geolocation is not supported by this browser.");
+                alert("Geolocation is not supported by your browser.");
             }
         }
 
-        // Stop tracking the location
-        function stopTracking() {
-            if (trackingId) {
-                navigator.geolocation.clearWatch(trackingId);
-            }
-        }
+        // Add event listener to the Start button
+        document.getElementById('startButton').addEventListener('click', startSendingLocation);
     </script>
 </body>
 </html>
