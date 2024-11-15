@@ -19,15 +19,18 @@
 <body>
     <h1>Send Real-Time Location</h1>
     <p>Click the button below to start sending your real-time location to the database:</p>
-    <button id="startButton">Start Sending Location</button>
+    <form onsubmit="event.preventDefault();">
+        Enter your bus no: <input id="bno" type="number" required>
+        <button id="startButton" type="submit">Start Sending Location</button>
+    </form>
 
     <!-- Firebase Scripts -->
     <script type="module">
         // Firebase SDK imports
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
-        import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+        import { getDatabase, ref, set, get, child } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
 
-        // Firebase configuration (replace with your actual Firebase project details)
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCaNsjn5XPnr7P6ufN10T1Ej10mNFAcBP4",
             authDomain: "tracking-application-d2060.firebaseapp.com",
@@ -44,22 +47,42 @@
 
         // Function to start sending location
         function startSendingLocation() {
+            const busNo = document.getElementById("bno").value;
+            if (!busNo) {
+                alert("Please enter a bus number.");
+                return;
+            }
+
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
                     (position) => {
                         const { latitude, longitude } = position.coords;
                         const timestamp = Date.now();
-                        
-                        // Save the location to Firebase
-                        set(ref(database, 'busLocation'), {
-                            latitude: latitude,
-                            longitude: longitude,
-                            timestamp: timestamp
-                        }).then(() => {
-                            console.log("Location updated to Firebase");
-                        }).catch((error) => {
-                            console.error("Error updating location: ", error);
-                        });
+                        const locationRef = ref(database, `busLocation/${busNo}`);
+
+                        // Check if the bus number already exists
+                        get(child(ref(database), `busLocation/${busNo}`))
+                            .then((snapshot) => {
+                                if (snapshot.exists()) {
+                                    console.log("Bus number exists. Updating location...");
+                                } else {
+                                    console.log("Bus number does not exist. Creating new entry...");
+                                }
+
+                                // Save or update the location in Firebase
+                                set(locationRef, {
+                                    latitude,
+                                    longitude,
+                                    timestamp
+                                }).then(() => {
+                                    console.log("Location updated to Firebase");
+                                }).catch((error) => {
+                                    console.error("Error updating location: ", error);
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error checking bus number: ", error);
+                            });
                     },
                     (error) => {
                         console.error("Error getting location: ", error);
