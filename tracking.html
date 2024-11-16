@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Location Tracking</title>
+    <title>Real-Time Location Tracking with Route</title>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet" />
+    <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" rel="stylesheet" />
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -44,7 +45,8 @@
             border-radius: 5px;
             margin-right: 2%;
         }
-        option:first{
+
+        option:first {
             color: #909090;
         }
 
@@ -74,12 +76,10 @@
             font-size: 18px;
             font-weight: bold;
         }
-
     </style>
 </head>
 <body>
-
-    <h1>Real-Time Bus Location Tracking</h1>
+    <h1>Real-Time Bus Location Tracking with Route</h1>
 
     <div class="container">
         <div class="input-container">
@@ -97,12 +97,12 @@
                 <option value="10">Bus 10</option>
                 <option value="11">Bus 11</option>
                 <option value="12">Bus 12</option>
+                <!-- Add more buses as needed -->
             </select>
             <button id="fetchLocationButton">Fetch Location</button>
         </div>
 
         <div id="message" class="message"></div>
-
         <div id="map"></div>
     </div>
 
@@ -132,9 +132,17 @@
         const map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/streets-v11',
-            center: [0, 0], // Default center
-            zoom: 14 // Initial zoom level
+            center: [77.0716, 10.8874], // Approximate coordinates for Sri Shakthi Institute of Engineering and Technology
+            zoom: 14
         });
+
+        // Add the Directions control to the map
+        const directions = new MapboxDirections({
+            accessToken: mapboxgl.accessToken,
+            unit: 'metric',
+            profile: 'mapbox/driving'
+        });
+        map.addControl(directions, 'top-left');
 
         // Create a marker to show the location
         const marker = new mapboxgl.Marker()
@@ -151,7 +159,6 @@
             }
 
             const locationRef = ref(database, `busLocation/${busNo}`);
-
             onValue(locationRef, (snapshot) => {
                 const data = snapshot.val();
                 const messageElement = document.getElementById("message");
@@ -162,10 +169,12 @@
                     marker.setLngLat([longitude, latitude]);
                     map.setCenter([longitude, latitude]); // Recenter map
                     messageElement.textContent = ''; // Clear any previous message
+
+                    // Set the origin (bus location) and destination (new endpoint)
+                    directions.setOrigin([longitude, latitude]);
+                    directions.setDestination([77.07614, 11.04151]); // Updated destination
                 } else {
                     // Bus location not found
-                    marker.setLngLat([0, 0]);
-                    map.setCenter([0, 0]); // Reset map center
                     messageElement.textContent = 'Bus Location Unavailable'; // Show error message
                 }
             });
@@ -175,8 +184,8 @@
         document.getElementById('fetchLocationButton').addEventListener('click', fetchBusLocation);
     </script>
 
-    <!-- Include Mapbox GL JS library -->
+    <!-- Include Mapbox GL JS and Directions plugin libraries -->
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
-
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
 </body>
 </html>
