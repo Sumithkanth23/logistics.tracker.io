@@ -3,33 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Location Updater</title>
+    <title>Real-Time Location Tracking</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet" />
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
+            background-color: #f4f9f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
         }
+
+        h1 {
+            font-size: 28px;
+            color: #2e8b57;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        select {
+            padding: 10px;
+            font-size: 16px;
+            width: 200px;
+            border: 2px solid #2e8b57;
+            border-radius: 5px;
+        }
+        option:first{
+            color: #909090;
+        }
+
         button {
             padding: 10px 20px;
             font-size: 16px;
+            background-color: #2e8b57;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
+
+        button:hover {
+            background-color: #26734d;
+        }
+
+        #map {
+            width: 100%;
+            height: 500px;
+            margin-top: 20px;
+        }
+
+        .message {
+            text-align: center;
+            color: #e74c3c;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
-    <h1>Send Real-Time Location</h1>
-    <p>Click the button below to start sending your real-time location to the database:</p>
-    <form onsubmit="event.preventDefault();">
-        Enter your bus no: <input id="bno" type="number" required>
-        <br><br>
-        <button id="startButton" type="submit">Start Sending Location</button>
-    </form>
 
-    <!-- Firebase Scripts -->
+    <h1>Real-Time Bus Location Tracking</h1>
+
+    <div class="container">
+        <div class="input-container">
+            <select id="busNumber">
+                <option value="" id="selectbus" disabled selected style="color: #909090;">Select Bus</option>
+                <option value="1">Bus 1</option>
+                <option value="2">Bus 2</option>
+                <option value="3">Bus 3</option>
+                <option value="4">Bus 4</option>
+                <option value="5">Bus 5</option>
+                <option value="6">Bus 6</option>
+                <option value="7">Bus 7</option>
+                <option value="8">Bus 8</option>
+                <option value="9">Bus 9</option>
+                <option value="10">Bus 10</option>
+                <option value="11">Bus 11</option>
+                <option value="12">Bus 12</option>
+            </select>
+            <button id="fetchLocationButton">Fetch Location</button>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div id="map"></div>
+    </div>
+
     <script type="module">
-        // Firebase SDK imports
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
-        import { getDatabase, ref, set, get, child } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
 
         // Firebase configuration
         const firebaseConfig = {
@@ -46,57 +124,58 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Function to start sending location
-        function startSendingLocation() {
-            const busNo = document.getElementById("bno").value;
+        // Mapbox access token
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic3VtaXRoa2FudGgwNyIsImEiOiJjbTNoaHRiMjUwYW0yMmpzOGF2bzl6NzhyIn0.ZKv6URC1WfYRAA91qfp5NA';
+
+        // Initialize the Mapbox map
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [0, 0], // Default center
+            zoom: 14 // Initial zoom level
+        });
+
+        // Create a marker to show the location
+        const marker = new mapboxgl.Marker()
+            .setLngLat([0, 0]) // Initial marker position
+            .addTo(map);
+
+        // Function to fetch bus location from Firebase
+        function fetchBusLocation() {
+            const busNo = document.getElementById("busNumber").value;
+
             if (!busNo) {
-                alert("Please enter a bus number.");
+                alert("Please select a bus number.");
                 return;
             }
 
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(
-                    (position) => {
-                        const { latitude, longitude } = position.coords;
-                        const timestamp = Date.now();
-                        const locationRef = ref(database, `busLocation/${busNo}`);
+            const locationRef = ref(database, `busLocation/${busNo}`);
 
-                        // Check if the bus number already exists
-                        get(child(ref(database), `busLocation/${busNo}`))
-                            .then((snapshot) => {
-                                if (snapshot.exists()) {
-                                    console.log("Bus number exists. Updating location...");
-                                } else {
-                                    console.log("Bus number does not exist. Creating new entry...");
-                                }
+            onValue(locationRef, (snapshot) => {
+                const data = snapshot.val();
+                const messageElement = document.getElementById("message");
 
-                                // Save or update the location in Firebase
-                                set(locationRef, {
-                                    latitude,
-                                    longitude,
-                                    timestamp
-                                }).then(() => {
-                                    console.log("Location updated to Firebase");
-                                }).catch((error) => {
-                                    console.error("Error updating location: ", error);
-                                });
-                            })
-                            .catch((error) => {
-                                console.error("Error checking bus number: ", error);
-                            });
-                    },
-                    (error) => {
-                        console.error("Error getting location: ", error);
-                    },
-                    { enableHighAccuracy: true }
-                );
-            } else {
-                alert("Geolocation is not supported by your browser.");
-            }
+                if (data) {
+                    // Bus location found, update the map
+                    const { longitude, latitude } = data;
+                    marker.setLngLat([longitude, latitude]);
+                    map.setCenter([longitude, latitude]); // Recenter map
+                    messageElement.textContent = ''; // Clear any previous message
+                } else {
+                    // Bus location not found
+                    marker.setLngLat([0, 0]);
+                    map.setCenter([0, 0]); // Reset map center
+                    messageElement.textContent = 'Bus Location Unavailable'; // Show error message
+                }
+            });
         }
 
-        // Add event listener to the Start button
-        document.getElementById('startButton').addEventListener('click', startSendingLocation);
+        // Add event listener to the Fetch Location button
+        document.getElementById('fetchLocationButton').addEventListener('click', fetchBusLocation);
     </script>
+
+    <!-- Include Mapbox GL JS library -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+
 </body>
 </html>
