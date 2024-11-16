@@ -54,6 +54,18 @@
                     <option value="1">Bus 1</option>
                     <option value="2">Bus 2</option>
                     <option value="3">Bus 3</option>
+                    <option value="4">Bus 4</option>
+                    <option value="5">Bus 5</option>
+                    <option value="6">Bus 6</option>
+                    <option value="7">Bus 7</option>
+                    <option value="8">Bus 8</option>
+                    <option value="9">Bus 9</option>
+                    <option value="10">Bus 10</option>
+                    <option value="11">Bus 11</option>
+                    <option value="12">Bus 12</option>
+                    <option value="13">Bus 13</option>
+                    <option value="14">Bus 14</option>
+                    <option value="15">Bus 15</option>
                     <!-- Add more bus options as needed -->
                 </select>
             </div>
@@ -68,15 +80,17 @@
         import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
 
         // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCaNsjn5XPnr7P6ufN10T1Ej10mNFAcBP4",
-            authDomain: "tracking-application-d2060.firebaseapp.com",
-            databaseURL: "https://tracking-application-d2060-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "tracking-application-d2060",
-            storageBucket: "tracking-application-d2060.appspot.com",
-            messagingSenderId: "401177639432",
-            appId: "1:401177639432:web:1b6f9a914aa4d53efcefbd"
-        };
+        // Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyCaNsjn5XPnr7P6ufN10T1Ej10mNFAcBP4",
+    authDomain: "tracking-application-d2060.firebaseapp.com",
+    databaseURL: "https://tracking-application-d2060-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "tracking-application-d2060",
+    storageBucket: "tracking-application-d2060.appspot.com",
+    messagingSenderId: "401177639432",
+    appId: "1:401177639432:web:1b6f9a914aa4d53efcefbd"
+};
+
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -98,7 +112,7 @@
                     navigator.geolocation.clearWatch(locationWatcher);
                 }
 
-                // Request permission and start watching the position
+                // Use watchPosition to continuously track the position
                 locationWatcher = navigator.geolocation.watchPosition(
                     (position) => {
                         const { latitude, longitude } = position.coords;
@@ -128,3 +142,4 @@
     </script>
 </body>
 </html>
+
