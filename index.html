@@ -31,7 +31,6 @@
             width: 200px;
             border: 2px solid #2e8b57;
             border-radius: 5px;
-            
         }
 
         button {
@@ -40,6 +39,26 @@
             background-color: #30995e;
             color: white;
             border: none;
+        }
+        button:hover {
+            background-color: #104627;
+            color: white;
+        }
+
+        /* Animation styles */
+        #statusMessage {
+            display: none;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #2e8b57;
+            animation: fadeInOut 3s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
         }
     </style>
 </head>
@@ -64,11 +83,11 @@
                     <option value="11">Bus 11</option>
                     <option value="12">Bus 12</option>
                 </select>
-                <br>  
-                
+                <br>
             </div>
             <button id="startButton" type="submit">Start Sending Location</button>
         </form>
+        <div id="statusMessage">Updating Geolocation...</div>
     </div>
 
     <!-- Firebase Scripts -->
@@ -95,6 +114,8 @@
         // Function to start sending location
         function startSendingLocation() {
             const busNo = document.getElementById("busNumber").value;
+            const statusMessage = document.getElementById("statusMessage");
+
             if (!busNo) {
                 alert("Please select a bus number.");
                 return;
@@ -123,6 +144,12 @@
                                     timestamp
                                 }).then(() => {
                                     console.log("Location updated to Firebase");
+                                    window.location.href="update.html";
+                                    // Show the status message with animation
+                                    statusMessage.style.display = "block";
+                                    setTimeout(() => {
+                                        statusMessage.style.display = "none";
+                                    }, 3000); // Hide after 3 seconds
                                 }).catch((error) => {
                                     console.error("Error updating location: ", error);
                                 });
