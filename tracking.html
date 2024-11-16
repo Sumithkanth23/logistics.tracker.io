@@ -36,12 +36,15 @@
             margin-bottom: 20px;
         }
 
-        input[type="number"] {
+        select {
             padding: 10px;
             font-size: 16px;
             width: 200px;
             border: 2px solid #2e8b57;
             border-radius: 5px;
+        }
+        option:first{
+            color: #909090;
         }
 
         button {
@@ -79,7 +82,21 @@
 
     <div class="container">
         <div class="input-container">
-            <input id="bno" type="number" placeholder="Enter Bus No" required>
+            <select id="busNumber">
+                <option value="" id="selectbus" disabled selected style="color: #909090;">Select Bus</option>
+                <option value="1">Bus 1</option>
+                <option value="2">Bus 2</option>
+                <option value="3">Bus 3</option>
+                <option value="4">Bus 4</option>
+                <option value="5">Bus 5</option>
+                <option value="6">Bus 6</option>
+                <option value="7">Bus 7</option>
+                <option value="8">Bus 8</option>
+                <option value="9">Bus 9</option>
+                <option value="10">Bus 10</option>
+                <option value="11">Bus 11</option>
+                <option value="12">Bus 12</option>
+            </select>
             <button id="fetchLocationButton">Fetch Location</button>
         </div>
 
@@ -125,10 +142,10 @@
 
         // Function to fetch bus location from Firebase
         function fetchBusLocation() {
-            const busNo = document.getElementById("bno").value;
+            const busNo = document.getElementById("busNumber").value;
 
             if (!busNo) {
-                alert("Please enter a bus number.");
+                alert("Please select a bus number.");
                 return;
             }
 
@@ -162,4 +179,3 @@
 
 </body>
 </html>
-
