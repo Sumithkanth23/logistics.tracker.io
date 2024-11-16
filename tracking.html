@@ -15,11 +15,11 @@
             padding: 0;
         }
 
-        h1 {
+        h3 {
             font-size: 28px;
             color: #2e8b57;
             text-align: center;
-            margin-top: 20px;
+            margin-top: 2%;
         }
 
         .container {
@@ -46,10 +46,6 @@
             margin-right: 2%;
         }
 
-        option:first {
-            color: #909090;
-        }
-
         button {
             padding: 10px 20px;
             font-size: 16px;
@@ -67,7 +63,7 @@
         #map {
             width: 100%;
             height: 500px;
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
         .message {
@@ -76,34 +72,32 @@
             font-size: 18px;
             font-weight: bold;
         }
+
+        .eta {
+            font-size: px;
+            text-align: center;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-    <h1>Real-Time Bus Location Tracking with Route</h1>
+    <h3>SIET BUS</h3>
 
     <div class="container">
         <div class="input-container">
             <select id="busNumber">
-                <option value="" id="selectbus" disabled selected style="color: #909090;">Select Bus</option>
+                <option value="" id="selectbus" disabled selected>Select Bus</option>
                 <option value="1">Bus 1</option>
                 <option value="2">Bus 2</option>
-                <option value="3">Bus 3</option>
-                <option value="4">Bus 4</option>
-                <option value="5">Bus 5</option>
-                <option value="6">Bus 6</option>
-                <option value="7">Bus 7</option>
-                <option value="8">Bus 8</option>
-                <option value="9">Bus 9</option>
-                <option value="10">Bus 10</option>
-                <option value="11">Bus 11</option>
-                <option value="12">Bus 12</option>
                 <!-- Add more buses as needed -->
             </select>
             <button id="fetchLocationButton">Fetch Location</button>
         </div>
 
         <div id="message" class="message"></div>
+        <div id="eta" class="eta"></div>
         <div id="map"></div>
+        
     </div>
 
     <script type="module">
@@ -136,18 +130,34 @@
             zoom: 14
         });
 
-        // Add the Directions control to the map
+        // Add the Directions control to the map (without instructions)
         const directions = new MapboxDirections({
             accessToken: mapboxgl.accessToken,
             unit: 'metric',
-            profile: 'mapbox/driving'
+            profile: 'mapbox/driving', // Fix the travel mode to driving
+            controls: { instructions: false } // Disable the instructions
         });
         map.addControl(directions, 'top-left');
 
-        // Create a marker to show the location
-        const marker = new mapboxgl.Marker()
+        // Create a bus marker with an icon
+        const busIconUrl = 'https://img.icons8.com/ios/452/bus.png'; // Use a bus icon URL or local file path
+        const marker = new mapboxgl.Marker({
+            element: createBusMarkerElement(busIconUrl)
+        })
             .setLngLat([0, 0]) // Initial marker position
             .addTo(map);
+
+        // Function to create bus marker element with custom icon
+        function createBusMarkerElement(iconUrl) {
+            const busElement = document.createElement('div');
+            busElement.style.width = '40px';
+            busElement.style.height = '40px';
+            busElement.style.backgroundImage = `url(${iconUrl})`;
+            busElement.style.backgroundSize = 'contain';
+            busElement.style.backgroundPosition = 'center';
+            busElement.style.backgroundRepeat = 'no-repeat';
+            return busElement;
+        }
 
         // Function to fetch bus location from Firebase
         function fetchBusLocation() {
@@ -162,6 +172,7 @@
             onValue(locationRef, (snapshot) => {
                 const data = snapshot.val();
                 const messageElement = document.getElementById("message");
+                const etaElement = document.getElementById("eta");
 
                 if (data) {
                     // Bus location found, update the map
@@ -173,11 +184,33 @@
                     // Set the origin (bus location) and destination (new endpoint)
                     directions.setOrigin([longitude, latitude]);
                     directions.setDestination([77.07614, 11.04151]); // Updated destination
+
+                    // Fetch ETA from Mapbox Directions API
+                    fetchETA([longitude, latitude], [77.07614, 11.04151]);
                 } else {
                     // Bus location not found
                     messageElement.textContent = 'Bus Location Unavailable'; // Show error message
                 }
             });
+        }
+
+        // Function to fetch Estimated Time of Arrival (ETA)
+        function fetchETA(origin, destination) {
+            const etaElement = document.getElementById("eta");
+
+            const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${origin[0]},${origin[1]};${destination[0]},${destination[1]}?access_token=${mapboxgl.accessToken}&alternatives=false&geometries=geojson&steps=false`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const duration = data.routes[0].duration; // Duration in seconds
+                    const etaMinutes = Math.round(duration / 60); // Convert seconds to minutes
+                    etaElement.textContent = `ETA: ${etaMinutes} minutes`;
+                })
+                .catch(error => {
+                    console.error('Error fetching ETA:', error);
+                    etaElement.textContent = 'Unable to calculate ETA';
+                });
         }
 
         // Add event listener to the Fetch Location button
