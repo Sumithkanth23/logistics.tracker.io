@@ -16,42 +16,30 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-let intervalId;
-
-window.startSendingVehicleNumber = function () {
+window.sendManualLocation = function () {
   const vehicleNo = document.getElementById("vehicleNumber").value.trim();
+  const lat = parseFloat(document.getElementById("latitude").value);
+  const lng = parseFloat(document.getElementById("longitude").value);
   const status = document.getElementById("statusMessage");
 
-  if (!vehicleNo) {
-    alert("Please enter a vehicle number.");
+  if (!vehicleNo || isNaN(lat) || isNaN(lng)) {
+    alert("Please enter valid vehicle number, latitude, and longitude.");
     return;
   }
 
-  clearInterval(intervalId);
+  const key = vehicleNo.replace(/\s+/g, "_");
+  const locationRef = ref(database, `busLocation/${key}`);
 
-  intervalId = setInterval(() => {
-    const timestamp = Date.now();
-    const safePath = vehicleNo.replace(/\s+/g, "_");
-    const vehicleRef = ref(database, `vehicles/${safePath}`);
-
-    set(vehicleRef, {
-      vehicleNumber: vehicleNo,
-      updatedAt: timestamp
-    }).then(() => {
-      console.log("Vehicle number updated");
-    }).catch((error) => {
-      console.error("Error updating vehicle number:", error);
+  set(locationRef, {
+    latitude: lat,
+    longitude: lng,
+    timestamp: Date.now()
+  })
+    .then(() => {
+      status.textContent = "✅ Location updated successfully.";
+    })
+    .catch((err) => {
+      console.error("Error:", err);
+      status.textContent = "❌ Failed to update location.";
     });
-  }, 3000);
-
-  document.getElementById("startButton").disabled = true;
-  document.getElementById("stopButton").style.display = "inline-block";
-  status.textContent = "Sending vehicle number every 3 seconds...";
-};
-
-window.stopSending = function () {
-  clearInterval(intervalId);
-  document.getElementById("startButton").disabled = false;
-  document.getElementById("stopButton").style.display = "none";
-  document.getElementById("statusMessage").textContent = "Stopped sending.";
 };
