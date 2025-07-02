@@ -12,11 +12,10 @@ const firebaseConfig = {
   appId: "1:401177639432:web:1b6f9a914aa4d53efcefbd"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-// Mapbox
+// Mapbox config
 mapboxgl.accessToken = 'pk.eyJ1Ijoic3VtaXRoa2FudGgwNyIsImEiOiJjbTNoaHRiMjUwYW0yMmpzOGF2bzl6NzhyIn0.ZKv6URC1WfYRAA91qfp5NA';
 
 const map = new mapboxgl.Map({
@@ -34,71 +33,53 @@ const directions = new MapboxDirections({
 });
 map.addControl(directions, 'top-left');
 
-const busIconUrl = 'https://img.icons8.com/ios/452/bus.png';
-const marker = new mapboxgl.Marker({
-  element: createBusMarker(busIconUrl)
-})
-  .setLngLat([0, 0])
-  .addTo(map);
+let marker = null;
 
-function createBusMarker(iconUrl) {
-  const el = document.createElement('div');
-  el.style.width = '40px';
-  el.style.height = '40px';
-  el.style.backgroundImage = `url(${iconUrl})`;
-  el.style.backgroundSize = 'contain';
-  return el;
-}
+// Handle location fetch
+document.getElementById("fetchLocationButton").addEventListener("click", () => {
+  const vehicleNo = document.getElementById("vehicleNumber").value.trim();
+  const key = vehicleNo.replace(/\s+/g, "_");
 
-function fetchBusLocation() {
-  const vehicleNumber = document.getElementById("vehicleNumber").value.trim();
-  const key = vehicleNumber.replace(/\s+/g, '_');
-
-  const messageEl = document.getElementById("message");
-  const etaEl = document.getElementById("eta");
-
-  if (!vehicleNumber) {
+  if (!vehicleNo) {
     alert("Please enter a vehicle number.");
     return;
   }
 
   const refPath = ref(database, `busLocation/${key}`);
+  const messageEl = document.getElementById("message");
+  const etaEl = document.getElementById("eta");
+
   onValue(refPath, (snapshot) => {
     const data = snapshot.val();
-
     if (data && data.latitude && data.longitude) {
       const { latitude, longitude } = data;
-      marker.setLngLat([longitude, latitude]);
-      map.setCenter([longitude, latitude]);
-      directions.setOrigin([longitude, latitude]);
-      directions.setDestination([77.07614, 11.04151]);
-      fetchETA([longitude, latitude], [77.07614, 11.04151]);
 
+      const coords = [longitude, latitude];
+      if (!marker) {
+        marker = new mapboxgl.Marker().setLngLat(coords).addTo(map);
+      } else {
+        marker.setLngLat(coords);
+      }
+
+      map.setCenter(coords);
       messageEl.textContent = "";
+      directions.setOrigin(coords);
+      directions.setDestination([77.07614, 11.04151]); // Example: College
+
+      // ETA calculation
+      fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${longitude},${latitude};77.07614,11.04151?access_token=${mapboxgl.accessToken}`)
+        .then(res => res.json())
+        .then(data => {
+          const duration = data.routes[0].duration;
+          const mins = Math.round(duration / 60);
+          etaEl.textContent = `ETA: ${mins} mins`;
+        }).catch(() => {
+          etaEl.textContent = "ETA: Not available";
+        });
     } else {
-      messageEl.textContent = "Vehicle location not found.";
+      messageEl.textContent = "Vehicle not found or no location yet.";
+      etaEl.textContent = "";
     }
   });
-}
+});
 
-function fetchETA(origin, destination) {
-  const etaEl = document.getElementById("eta");
-  const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${origin[0]},${origin[1]};${destination[0]},${destination[1]}?access_token=${mapboxgl.accessToken}&alternatives=false&geometries=geojson&steps=false`;
-
-  fetch(url)
-    .then(res => res.json())
-    .then(data => {
-      const seconds = data.routes[0]?.duration;
-      if (seconds) {
-        etaEl.textContent = `ETA: ${Math.round(seconds / 60)} minutes`;
-      } else {
-        etaEl.textContent = "ETA not available";
-      }
-    })
-    .catch(err => {
-      console.error("ETA error:", err);
-      etaEl.textContent = "ETA error";
-    });
-}
-
-document.getElementById("fetchLocationButton").addEventListener("click", fetchBusLocation);
