@@ -3,24 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Send Vehicle Number</title>
+  <title>Driver Location Sender</title>
   <link rel="stylesheet" href="transmit.css" />
 </head>
 <body>
-  <h1>Send Vehicle Number</h1>
-  <p>Enter your vehicle number and send it to Firebase every 3 seconds.</p>
+  <h1>Driver Location Uploader</h1>
+  <p>Enter your vehicle number and start sending your live location.</p>
 
   <div class="container">
-    <form onsubmit="event.preventDefault(); startSendingVehicleNumber();">
-      <input type="text" id="vehicleNumber" placeholder="Enter Vehicle Number (e.g. TN 38 AB 1234)" required />
-
-      <button type="submit" id="startButton">Start Sending</button>
-      <button type="button" id="stopButton" onclick="stopSending()" style="display:none;">Stop</button>
-
-      <p id="statusMessage"></p>
+    <form onsubmit="event.preventDefault(); startSendingLocation();">
+      <input type="text" id="vehicleNumber" placeholder="Vehicle Number (e.g. TN 38 AB 1234)" required />
+      <button type="submit">Start Sending Location</button>
     </form>
+
+    <p id="statusMessage"></p>
   </div>
 
   <script type="module" src="transmit.js"></script>
 </body>
 </html>
+
