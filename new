@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SIET BUS TRACKER</title>
+
+    <!-- Mapbox CSS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet"/>
+    <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" rel="stylesheet"/>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="index_styles.css" />
+</head>
+<body>
+    <div class="controls">
+        <select id="busNumber">
+            <option value="" disabled selected>Select Bus</option>
+            <option value="1">Bus 1</option>
+            <option value="2">Bus 2</option>
+            <option value="6">Bus 3</option>
+            <!-- Add more buses as needed -->
+        </select>
+        <button id="fetchLocationButton">Fetch Location</button>
+    </div>
+
+    <div id="message" class="message"></div>
+    <div id="eta" class="eta"></div>
+    <div id="map"></div>
+
+    <!-- Mapbox JS -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
+
+    <!-- Firebase and App Logic -->
+    <script type="module" src="index.js"></script>
+</body>
+</html>
