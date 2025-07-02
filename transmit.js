@@ -16,30 +16,56 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-window.sendManualLocation = function () {
+let intervalId = null;
+
+window.startSendingLocation = function () {
   const vehicleNo = document.getElementById("vehicleNumber").value.trim();
-  const lat = parseFloat(document.getElementById("latitude").value);
-  const lng = parseFloat(document.getElementById("longitude").value);
   const status = document.getElementById("statusMessage");
 
-  if (!vehicleNo || isNaN(lat) || isNaN(lng)) {
-    alert("Please enter valid vehicle number, latitude, and longitude.");
+  if (!vehicleNo) {
+    alert("Please enter your vehicle number.");
     return;
   }
 
-  const key = vehicleNo.replace(/\s+/g, "_");
-  const locationRef = ref(database, `busLocation/${key}`);
+  const formattedKey = vehicleNo.replace(/\s+/g, "_");
 
-  set(locationRef, {
-    latitude: lat,
-    longitude: lng,
-    timestamp: Date.now()
-  })
-    .then(() => {
-      status.textContent = "✅ Location updated successfully.";
-    })
-    .catch((err) => {
-      console.error("Error:", err);
-      status.textContent = "❌ Failed to update location.";
-    });
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by your browser.");
+    return;
+  }
+
+  // Clear any previous interval
+  clearInterval(intervalId);
+
+  // Start fetching location every 3 seconds
+  intervalId = setInterval(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const locationRef = ref(database, `busLocation/${formattedKey}`);
+
+        set(locationRef, {
+          latitude,
+          longitude,
+          timestamp: Date.now()
+        })
+          .then(() => {
+            console.log("✅ Location updated");
+            status.textContent = "✅ Location sent to Firebase";
+            status.style.color = "green";
+          })
+          .catch((err) => {
+            console.error("❌ Error updating location:", err);
+            status.textContent = "❌ Error updating location";
+            status.style.color = "red";
+          });
+      },
+      (error) => {
+        console.error("❌ Geolocation error:", error);
+        status.textContent = "❌ Failed to fetch location";
+        status.style.color = "red";
+      },
+      { enableHighAccuracy: true }
+    );
+  }, 3000); // Every 3 seconds
 };
