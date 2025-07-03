@@ -1,73 +1,109 @@
-/* Base layout for full-screen map */
-html, body {
+body {
+  font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  height: 100%;
-  width: 100%;
-  font-family: Arial, sans-serif;
+  overflow: hidden;
 }
 
 #map {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  z-index: 0;
+  width: 100vw;
+  height: 100vh;
 }
 
-/* Floating controls panel (compact style) */
 .controls {
   position: absolute;
   top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1;
-  background-color: rgba(255, 255, 255, 0.95);
+  left: 20px;
+  z-index: 10;
+  background-color: white;
   padding: 12px 16px;
   border-radius: 8px;
-  text-align: center;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
-  max-width: 200px;
-  width: auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.15);
+  display: flex;
+  gap: 10px;
 }
 
-/* Heading inside the controls */
-.controls h2 {
-  margin: 0 0 10px;
-  font-size: 16px;
-  color: #2e8b57;
-}
-
-/* Input box for vehicle number */
 .controls input {
-  padding: 6px;
-  font-size: 14px;
-  width: 200px;
-  border: 1px solid #ccc;
+  padding: 8px;
+  border: 2px solid #2e8b57;
   border-radius: 4px;
-  margin-bottom: 8px;
+  font-size: 14px;
 }
 
-/* Track button */
 .controls button {
-  padding: 6px 12px;
-  font-size: 14px;
   background-color: #2e8b57;
   color: white;
   border: none;
+  padding: 8px 12px;
   border-radius: 4px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .controls button:hover {
-  background-color: #256d45;
+  transform: scale(1.05);
 }
 
-/* Message and ETA text */
-.message,
-.eta {
-  font-size: 13px;
-  margin-top: 5px;
-  font-weight: bold;
+.controls button:active {
+  transform: scale(0.95);
+  background-color: #226a45;
+}
+
+.message, .eta {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: white;
+  padding: 10px 14px;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.15);
+  z-index: 5;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Profile Dropdown */
+.profile-dropdown {
+  position: fixed;
+  top: 15px;
+  right: 20px;
+  z-index: 1000;
+}
+
+#profileBtn {
+  font-size: 22px;
+  background: #2e8b57;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.profile-menu {
+  display: none;
+  position: absolute;
+  top: 48px;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 10px 14px;
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.15);
+  font-size: 14px;
+  text-align: left;
+}
+
+.profile-menu p {
+  margin: 5px 0;
+}
+
+.profile-menu button {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 8px;
 }
