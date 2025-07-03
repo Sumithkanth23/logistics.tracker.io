@@ -1,6 +1,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
 import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
+import { signOut } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
 
 // Firebase config
 const firebaseConfig = {
@@ -112,3 +113,29 @@ function getETA(origin, destination) {
       document.getElementById("eta").textContent = "ETA unavailable";
     });
 }
+
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  const auth = getAuth();
+
+  // Sign out from Firebase
+  signOut(auth)
+    .then(() => {
+      // Clear local/session storage and cookies
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // Clear all cookies
+      document.cookie.split(";").forEach(cookie => {
+        document.cookie = cookie
+          .replace(/^ +/, "")
+          .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`);
+      });
+
+      // Redirect to login
+      window.location.href = "login.html";
+    })
+    .catch((error) => {
+      console.error("Logout error:", error.message);
+    });
+});
+
