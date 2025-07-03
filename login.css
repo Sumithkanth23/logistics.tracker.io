@@ -1,1 +1,76 @@
+/* General body layout */
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
 
+/* Login container styling */
+.login-box {
+  background-color: #ffffff;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 320px;
+}
+
+/* Heading style */
+.login-box h2 {
+  margin-bottom: 20px;
+  color: #2e8b57;
+}
+
+/* Input fields */
+.login-box input[type="email"],
+.login-box input[type="password"] {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  margin: 10px 0;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  transition: border 0.3s;
+}
+
+.login-box input:focus {
+  border-color: #2e8b57;
+  outline: none;
+}
+
+/* Button with hover and press effects */
+.login-box button {
+  background-color: #2e8b57;
+  color: white;
+  padding: 10px 18px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.2s ease;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.login-box button:hover {
+  transform: translateY(-3px);
+  background-color: #3fa66c;
+}
+
+.login-box button:active {
+  transform: translateY(2px);
+  background-color: #256b45;
+}
+
+/* Error message */
+#loginError {
+  color: red;
+  margin-top: 10px;
+  font-size: 14px;
+}
