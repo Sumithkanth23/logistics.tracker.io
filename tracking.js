@@ -131,7 +131,6 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
           .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`);
       });
 
-      // Redirect to login
       window.location.href = "index.html";
     })
     .catch((error) => {
