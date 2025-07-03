@@ -20,7 +20,7 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
 
   signInWithEmailAndPassword(auth, email, password)
     .then(() => {
-      window.location.href = 'tracking.html';
+      window.location.href = 'index.html';
     })
     .catch((error) => {
       document.getElementById('errorMsg').textContent = "Invalid email or password.";
