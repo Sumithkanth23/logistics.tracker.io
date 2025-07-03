@@ -1,7 +1,8 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
 import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
 
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCaNsjn5XPnr7P6ufN10T1Ej10mNFAcBP4",
   authDomain: "tracking-application-d2060.firebaseapp.com",
@@ -12,100 +13,102 @@ const firebaseConfig = {
   appId: "1:401177639432:web:1b6f9a914aa4d53efcefbd"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const database = getDatabase(app);
+const auth = getAuth(app);
 
-// Authentication check
+// Check auth state
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    document.getElementById('tracking-ui').style.display = 'block';
-    document.getElementById('user-name').textContent = user.displayName || 'User';
-    document.getElementById('user-email').textContent = user.email;
-    document.getElementById('user-phone').textContent = user.phoneNumber || 'N/A';
-    initMapbox();
+  if (!user) {
+    alert("You are not logged in.");
+    window.location.href = "index.html";
   } else {
-    document.getElementById('not-logged-in').style.display = 'block';
+    console.log("Logged in as:", user.email);
   }
 });
 
-// Profile toggle
-document.getElementById('profileBtn').addEventListener('click', () => {
-  const menu = document.getElementById('profileMenu');
-  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+// Mapbox token
+mapboxgl.accessToken = 'pk.eyJ1Ijoic3VtaXRoa2FudGgwNyIsImEiOiJjbTNoaHRiMjUwYW0yMmpzOGF2bzl6NzhyIn0.ZKv6URC1WfYRAA91qfp5NA';
+
+// Initialize map
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/streets-v11',
+  center: [77.0716, 10.8874],
+  zoom: 13
 });
 
-// Logout
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  auth.signOut().then(() => {
-    window.location.href = 'index.html';
-  });
+// Add directions control
+const directions = new MapboxDirections({
+  accessToken: mapboxgl.accessToken,
+  unit: 'metric',
+  profile: 'mapbox/driving',
+  controls: { instructions: false }
 });
+map.addControl(directions, 'top-left');
 
-// Map + Tracking
-function initMapbox() {
-  mapboxgl.accessToken = 'pk.eyJ1Ijoic3VtaXRoa2FudGgwNyIsImEiOiJjbTNoaHRiMjUwYW0yMmpzOGF2bzl6NzhyIn0.ZKv6URC1WfYRAA91qfp5NA';
+// Custom marker
+const marker = new mapboxgl.Marker({
+  element: createBusMarker()
+}).setLngLat([0, 0]).addTo(map);
 
-  const map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v11',
-    center: [77.0716, 10.8874],
-    zoom: 14
-  });
+// Create bus icon
+function createBusMarker() {
+  const el = document.createElement('div');
+  el.style.width = '40px';
+  el.style.height = '40px';
+  el.style.backgroundImage = "url('https://img.icons8.com/ios/452/bus.png')";
+  el.style.backgroundSize = 'contain';
+  el.style.backgroundRepeat = 'no-repeat';
+  return el;
+}
 
-  const directions = new MapboxDirections({
-    accessToken: mapboxgl.accessToken,
-    unit: 'metric',
-    profile: 'mapbox/driving',
-    controls: { instructions: false }
-  });
-  map.addControl(directions, 'top-left');
-
-  const marker = new mapboxgl.Marker({
-    element: createBusMarker('https://img.icons8.com/ios/452/bus.png')
-  }).setLngLat([0, 0]).addTo(map);
-
-  function createBusMarker(iconUrl) {
-    const div = document.createElement('div');
-    div.style.width = '40px';
-    div.style.height = '40px';
-    div.style.backgroundImage = `url(${iconUrl})`;
-    div.style.backgroundSize = 'contain';
-    return div;
+// Track button click
+document.getElementById("fetchLocationButton").addEventListener("click", () => {
+  const vehicleNo = document.getElementById("vehicleNumber").value.trim();
+  if (!vehicleNo) {
+    alert("Please enter a vehicle number.");
+    return;
   }
 
-  document.getElementById('fetchLocationButton').addEventListener('click', () => {
-    const vehicleNumber = document.getElementById('vehicleNumber').value.trim();
-    if (!vehicleNumber) return alert("Enter vehicle number");
+  const path = `vehicles/${vehicleNo}`;
+  const refPath = ref(database, path);
 
-    const locationRef = ref(database, `busLocation/${vehicleNumber}`);
-    onValue(locationRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data?.latitude && data?.longitude) {
-        const { latitude, longitude } = data;
-        marker.setLngLat([longitude, latitude]);
-        map.setCenter([longitude, latitude]);
-        directions.setOrigin([longitude, latitude]);
-        directions.setDestination([77.07614, 11.04151]);
-        fetchETA([longitude, latitude], [77.07614, 11.04151]);
-        document.getElementById("message").textContent = "";
+  onValue(refPath, (snapshot) => {
+    const data = snapshot.val();
+    if (data && data.latitude && data.longitude) {
+      const { latitude, longitude } = data;
+      marker.setLngLat([longitude, latitude]);
+      map.flyTo({ center: [longitude, latitude], zoom: 14 });
+
+      directions.setOrigin([longitude, latitude]);
+      directions.setDestination([77.07614, 11.04151]); // College
+
+      getETA([longitude, latitude], [77.07614, 11.04151]);
+      document.getElementById("message").textContent = "";
+    } else {
+      document.getElementById("message").textContent = "Location not available for this vehicle.";
+    }
+  });
+});
+
+// Get ETA using Mapbox API
+function getETA(origin, destination) {
+  const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${origin[0]},${origin[1]};${destination[0]},${destination[1]}?access_token=${mapboxgl.accessToken}&geometries=geojson`;
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      if (data.routes && data.routes.length > 0) {
+        const minutes = Math.round(data.routes[0].duration / 60);
+        document.getElementById("eta").textContent = `ETA: ${minutes} min`;
       } else {
-        document.getElementById("message").textContent = "Vehicle location not available.";
-        document.getElementById("eta").textContent = "";
+        document.getElementById("eta").textContent = "ETA unavailable";
       }
+    })
+    .catch(err => {
+      console.error("ETA error:", err);
+      document.getElementById("eta").textContent = "ETA unavailable";
     });
-  });
-
-  function fetchETA(origin, destination) {
-    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${origin[0]},${origin[1]};${destination[0]},${destination[1]}?access_token=${mapboxgl.accessToken}&steps=false`;
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        const mins = Math.round(data.routes[0].duration / 60);
-        document.getElementById('eta').textContent = `ETA: ${mins} min`;
-      })
-      .catch(() => {
-        document.getElementById('eta').textContent = "Unable to calculate ETA";
-      });
-  }
 }
