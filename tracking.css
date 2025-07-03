@@ -76,3 +76,29 @@ html, body {
   font-weight: bold;
   z-index: 10;
 }
+.user-dropdown {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+#logoutBtn {
+  padding: 8px 14px;
+  background-color: #2e8b57;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+#logoutBtn:hover {
+  background-color: #246c45;
+  transform: scale(1.05);
+}
+
+#logoutBtn:active {
+  background-color: #1e5e37;
+  transform: scale(0.95);
+}
