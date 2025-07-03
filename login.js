@@ -13,16 +13,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-window.login = function () {
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
-  const errorDisplay = document.getElementById("loginError");
+document.getElementById('loginForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
   signInWithEmailAndPassword(auth, email, password)
     .then(() => {
-      window.location.href = "tracking.html";
+      window.location.href = 'tracking.html';
     })
-    .catch(error => {
-      errorDisplay.textContent = "Login failed: " + error.message;
+    .catch((error) => {
+      document.getElementById('errorMsg').textContent = "Invalid email or password.";
+      console.error(error);
     });
-};
+});
