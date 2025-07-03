@@ -1,109 +1,78 @@
-body {
-  font-family: Arial, sans-serif;
+html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  font-family: Arial, sans-serif;
 }
 
 #map {
-  width: 100vw;
-  height: 100vh;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
 }
 
-.controls {
+/* Top Floating UI */
+.map-ui {
   position: absolute;
   top: 20px;
-  left: 20px;
-  z-index: 10;
-  background-color: white;
-  padding: 12px 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 12px 20px;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.15);
   display: flex;
   gap: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 10;
+  align-items: center;
 }
 
-.controls input {
-  padding: 8px;
+.map-ui input {
+  padding: 10px;
   border: 2px solid #2e8b57;
-  border-radius: 4px;
+  border-radius: 5px;
   font-size: 14px;
+  min-width: 280px;
 }
 
-.controls button {
+.map-ui button {
   background-color: #2e8b57;
   color: white;
   border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
+  padding: 10px 16px;
+  font-size: 14px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
 }
 
-.controls button:hover {
+.map-ui button:hover {
   transform: scale(1.05);
+  background-color: #246c45;
 }
 
-.controls button:active {
-  transform: scale(0.95);
-  background-color: #226a45;
+.map-ui button:active {
+  transform: scale(0.98);
+  background-color: #1e5e37;
 }
 
-.message, .eta {
+/* ETA message */
+.eta {
+  margin-left: 10px;
+  font-size: 14px;
+  color: #444;
+}
+
+/* Error message at bottom */
+.message {
   position: absolute;
   bottom: 20px;
-  left: 20px;
-  background: white;
-  padding: 10px 14px;
-  border-radius: 6px;
-  box-shadow: 0 0 6px rgba(0,0,0,0.15);
-  z-index: 5;
-  font-size: 14px;
-  color: #333;
-}
-
-/* Profile Dropdown */
-.profile-dropdown {
-  position: fixed;
-  top: 15px;
-  right: 20px;
-  z-index: 1000;
-}
-
-#profileBtn {
-  font-size: 22px;
-  background: #2e8b57;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  padding: 10px 14px;
-  cursor: pointer;
-}
-
-.profile-menu {
-  display: none;
-  position: absolute;
-  top: 48px;
-  right: 0;
-  background: white;
-  border: 1px solid #ccc;
-  padding: 10px 14px;
-  border-radius: 6px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.15);
-  font-size: 14px;
-  text-align: left;
-}
-
-.profile-menu p {
-  margin: 5px 0;
-}
-
-.profile-menu button {
-  background-color: #d9534f;
-  color: white;
-  border: none;
-  padding: 5px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 8px;
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
+  color: red;
+  font-weight: bold;
+  z-index: 10;
 }
